@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Listing, Bids_table, Comments, Watchlist
+from auctions.forms import ListingForm, BidForm, CommentsForm
 
 # A variable to show total items in the watchlist
 total_items = Watchlist.objects.count()
