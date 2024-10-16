@@ -1,0 +1,53 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}><strong>{{ message }}</strong></li>
+        {% endfor %}
+    </ul>
+{% endif %}
+    <h2>Listings</h2>
+        <form action="{% url 'watch' %}" method="post" >
+            {% csrf_token %}
+            {% if available %}
+                <button type="submit" value="{{listing.id}}" name="Remove">Remove from watchlist</button>
+            {% else %}
+                <button type="submit" value="{{listing.id}}" name="Add">Add to watchlist</button>
+            {% endif %}
+        </form>
+    <li> Seller id: {{ listing.user.id }}</li>
+    <li> Seller: {{ listing.user }}</li>
+    <li> Item ID: {{ listing.id }}</li>
+    <li> Item Name: {{ listing.title }}</li>
+    <li> Item Description: {{ listing.description }}</li>
+    <li>{{ listing.category }}</li>
+    <li>{{ listing.starting_bid }}</li>
+    <p>Total bids ({{ total_bids }})</p>
+    {% for comment in comments %}
+        <li>{{ comment.author}}</li>
+        <li>{{ comment.comment}}</li>
+    {% endfor %}
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        Check my id {{ request.user.id }}
+        {% if user.id == listing.user.id %}
+            <input type="hidden"  name= "close" value="close">
+            <button type="submit">Close Bid</button>
+        {% else %}
+            {{ bid_form }}
+            <button type="submit" value="bid">Bid</button>
+        {% endif %}
+    </form>
+
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form }}
+        <input type="submit" value="comment">
+    </form>
+
+    {% for bid in bids %}
+        <p>{{bid}}</p>
+    {% endfor %}
+{% endblock %}

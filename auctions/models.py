@@ -7,12 +7,21 @@ class User(AbstractUser):
 
 
 class Listing(models.Model):
+
+    CATEGORY_CHOICES = [
+        ('elec', 'Electronics'),
+        ('ktc', 'Kitchen Appliances'),
+        ('clt', 'Clothing'),
+        ('fur', 'Furniture')
+    ]
+
     title = models.CharField(max_length=64)
     description = models.TextField()
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     posting_date = models.DateTimeField(auto_now_add=True)
-    category = models.CharField(max_length=32)
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
     image  = models.ImageField(null=True, blank=True, upload_to="images/")
+    closed = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listing")
     
 

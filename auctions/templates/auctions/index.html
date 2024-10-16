@@ -5,7 +5,8 @@
 
     {% for listing in listings %}
         <li> 
-            <a href="{% url 'listing' listing.id %}">Bid</a>
+            <a href="{% url 'listing' listing.id %}">View Item</a>
+            
             {{ listing.id }}
             {{ listing.title }} 
             {{ listing.price}}

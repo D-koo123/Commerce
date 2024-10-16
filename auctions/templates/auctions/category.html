@@ -1,0 +1,9 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+
+    {% for option in options %}
+        <li> <a href="{% url 'option' option %}"> {{ option }}</a></li>
+    {% endfor %}
+{% endblock %}

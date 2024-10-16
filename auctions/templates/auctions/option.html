@@ -1,0 +1,13 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Category Option</h2>
+    <h4> {{ option }}</h4>
+    {% if selected %}
+        {% for option in selected %}
+            <li> <a href="{% url 'listing' option.id %}">{{ option.title }}</a> </li>
+        {% endfor %}
+    {% else %}
+        <p> No items in Category</p>
+    {% endif %}
+{% endblock %}
