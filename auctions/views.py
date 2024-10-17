@@ -82,23 +82,26 @@ def create_listing(request):
     if request.method == "POST":
         user_instance = User.objects.get(id=request.user.id)
         # Obtain the form data
-        list_form = ListingForm(request.POST)
+        list_form = ListingForm(request.POST, request.FILES)
         if list_form.is_valid():
+            form.save()
+            '''
             title = list_form.cleaned_data["title"]
             description = list_form.cleaned_data["description"]
             category = list_form.cleaned_data["category"]
             starting_bid = list_form.cleaned_data["starting_bid"]
-            image = list_form.cleaned_data["image"]
+            image = request.FILES.get("image")
+            # Update the database with the created listing
+            listing = Listing(title=title, description=description, category=category, 
+                          starting_bid=starting_bid, user=user_instance, image=image)
+            listing.save()
+            '''
         else:
             HttpResponse("Your index submission has errors")
 
-        # Update the database with the created listing
-        listing = Listing(title=title, description=description, category=category, 
-                          starting_bid=starting_bid, user=user_instance, image=image)
-        listing.save()
+        
         return HttpResponseRedirect(reverse("index"))
     else:
-
         # If the user is logged in when visiting the create listing page
         if request.user.is_authenticated:
 
@@ -171,6 +174,7 @@ def listing(request, listing_id):
         bid_form = BidForm()
         comment_form = CommentsForm()
         author = User.objects.filter(pk=request.user.id).first()
+        #return HttpResponse(request.GET)
         listing = Listing.objects.filter(pk=listing_id).first()
         
         comments = Comments.objects.filter(listing=listing_id)
