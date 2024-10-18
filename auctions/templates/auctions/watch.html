@@ -3,21 +3,24 @@
 {% block body %}
     <h2>Watch list</h2>
         {% for item in watch_items %}
-            <ul id="active-listing"> 
-                <li>{% if item.listing.image %}
-                    <img src="{{ item.listing.image.url  }}" alt="photo of item" class="active-image">
-                {% endif %}</li>
-                <li> <a href="{% url 'listing' item.listing.id %}">{{ item.listing.title }}</a></li>
-                <li> Bid Price: 
-                    <b> Kshs. {{ item.listing.starting_bid }}</b><br>
-                    Status: 
-                    {% if item.listing.closed %}
-                        <b>Closed</b>
-                    {% else %}
-                        <b>Open</b>
-                    {% endif %}
-                </li>
-            </ul>
+            <div>
+                <ul id="active-listing"> 
+                    <li>{% if item.listing.image %}
+                        <img src="{{ item.listing.image.url  }}" alt="photo of item" class="active-image">
+                    {% endif %}</li>
+                    <li> <a href="{% url 'listing' item.listing.id %}">{{ item.listing.title }}</a>
+                         Bid Price: 
+                        <b> Kshs. {{ item.listing.starting_bid }}</b><br>
+                        Your Bid: Kshs. {{ item.user_bid }}<br>
+                        Status: 
+                        {% if item.listing.closed %}
+                            <b>Closed</b>
+                        {% else %}
+                            <b>Open</b>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
         {% endfor %}
         <hr>
 {% endblock %}

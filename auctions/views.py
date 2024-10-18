@@ -205,7 +205,10 @@ def watchlist(request):
             # If adding update the watchlist database
             listing_instance = Listing.objects.get(id=request.POST.get("add"))
             user_bid = Bids_table.objects.filter(author = user_instance, listing = listing_instance).last()
-            watch = Watchlist(author = user_instance, listing = listing_instance, user_bid = user_bid)
+            if user_bid:
+                watch = Watchlist(author = user_instance, listing = listing_instance, user_bid = user_bid.bid)
+            else:
+                watch = Watchlist(author = user_instance, listing = listing_instance)
             watch.save()
         else:
             # If removing delete the item from the watchlist database
