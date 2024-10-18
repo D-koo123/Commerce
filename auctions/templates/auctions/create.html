@@ -3,8 +3,17 @@
 {% block body %}
     <h2>Create Listings</h2>
     <form action="{% url 'create' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
+        {% csrf_token %}        
+        <label for="{{ form.title.id_for_label }}"><strong>{{ form.title.label }}</strong></label><br>
+        {{ form.title }}<br>
+        <label for="{{ form.description.id_for_label }}"><strong>{{ form.description.label }}</strong></label><br>
+        {{ form.description }}<br>
+        <label for="{{ form.category_id_for_label }}"><strong>{{ form.category.label }}</strong></label><br>
+        {{ form.category }}<br>
+        <label for="{{ form.posting_date.id_for_label }}"><strong>{{ form.posting_date.label }}</strong></label><br>
+        {{ form.posting_date }}<br>
+        <label for="{{ form.image.id_for_label }}"><strong>{{ form.image.label }}</strong></label><br>
+        {{ form.image }}<br><br> 
         <button type="submit">Post Bid</button>
     </form>
 {% endblock %}

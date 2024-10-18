@@ -4,22 +4,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Listing, Bids_table, Comments, Watchlist
 from auctions.forms import ListingForm, BidForm, CommentsForm
 
-# A variable to show total items in the watchlist
-
-
-
 
 def index(request):
+    '''
+    Renders all the active bids in the online auction
+    '''
+    #Pick only bids that are still active
     listing = Listing.objects.exclude(closed=True)
     return render(request, "auctions/index.html", {
         "listings":listing,
         "total": total_items(request.user.id)
     })
-
 
 
 def login_view(request):
@@ -73,7 +73,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-
+@login_required()
 def create_listing(request):
     '''
     A function to return the page to create a new listing if the mehthod is GET
@@ -85,17 +85,6 @@ def create_listing(request):
         list_form = ListingForm(request.POST, request.FILES)
         if list_form.is_valid():
             form.save()
-            '''
-            title = list_form.cleaned_data["title"]
-            description = list_form.cleaned_data["description"]
-            category = list_form.cleaned_data["category"]
-            starting_bid = list_form.cleaned_data["starting_bid"]
-            image = request.FILES.get("image")
-            # Update the database with the created listing
-            listing = Listing(title=title, description=description, category=category, 
-                          starting_bid=starting_bid, user=user_instance, image=image)
-            listing.save()
-            '''
         else:
             HttpResponse("Your index submission has errors")
 
@@ -112,7 +101,9 @@ def create_listing(request):
                 "total": total_items(request.user.id)
             })
         else:
-            HttpResponse("Kwanza Login boss")
+            # Remind the user to login
+            messages.error(request, "Kindly login")
+            return HttpResponseRedirect(reverse("login_vies"))
 
 
 def listing(request, listing_id):
@@ -149,17 +140,19 @@ def listing(request, listing_id):
                 return HttpResponse("Bid entered is too low")
 
         elif "close" in request.POST:
+            # Change the status of the closed field to true if the bid is closed
             listing_instance.closed = True
             listing_instance.save()
+            # Check if the winner of the bid already has the item in their watchlist
             available = Watchlist.objects.filter(author = user_instance, listing_id = listing_instance).exists()
             if not available:
+                # Add the item to the watchlist if not so the user can access when its not active
                 watch = Watchlist(author = user_instance, listing = listing_instance)
                 watch.save()
             return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
 
         else:
             comment_form = CommentsForm(request.POST)
-        
             if comment_form.is_valid():
                 comment = comment_form.cleaned_data['comment']
             else:
@@ -168,7 +161,7 @@ def listing(request, listing_id):
             # Update the user comment
             update_comment = Comments(author = user_instance, listing = listing_instance, comment = comment)
             update_comment.save()
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
     else:
         # Else if method is GET supply a form that will be used to support the new bid
         bid_form = BidForm()
@@ -230,10 +223,9 @@ def category(request):
         options = []
         for option in Listing.CATEGORY_CHOICES:
             options.append(option[1])
-        #listings = Listing.objects.all()
-        #return HttpResponse(options)
         return render(request, "auctions/category.html", {
-            "options":options
+            "options":options,
+            "total": total_items(request.user.id)
         })
 
 

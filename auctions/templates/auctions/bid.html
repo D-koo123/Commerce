@@ -17,14 +17,26 @@
                 <button type="submit" value="{{listing.id}}" name="Add">Add to watchlist</button>
             {% endif %}
         </form>
-    <li> Seller id: {{ listing.user.id }}</li>
-    <li> Seller: {{ listing.user }}</li>
-    <li> Item ID: {{ listing.id }}</li>
-    <li> Item Name: {{ listing.title }}</li>
-    <li> Item Description: {{ listing.description }}</li>
-    <li>{{ listing.category }}</li>
-    <li>{{ listing.starting_bid }}</li>
-    <p>Total bids ({{ total_bids }})</p>
+    <ul id="listing">
+        <li>
+            {% if listing.image %}
+                <img src="{{ listing.image.url }}" alt="photo of item" id="listing-image"></li>
+            {% endif %}
+        <li> Seller id: {{ listing.user.id }}</li>
+        <li> Seller: {{ listing.user }}</li>
+        <li> Item ID: {{ listing.id }}</li>
+        <li> Item Name: {{ listing.title }}</li>
+        <li> Item Description: {{ listing.description }}</li>
+        <li>{{ listing.category }}</li>
+        <li>{{ listing.starting_bid }}</li>
+        <li>
+            {%if listing.closed %}
+                closed
+            {% else %}
+                Open
+            {% endif %} </li>
+        <p>Total bids ({{ total_bids }})</p>
+    </ul>
     {% for comment in comments %}
         <li>{{ comment.author}}</li>
         <li>{{ comment.comment}}</li>
@@ -36,17 +48,16 @@
             <input type="hidden"  name= "close" value="close">
             <button type="submit">Close Bid</button>
         {% else %}
-            {{ bid_form }}
+            {{ bid_form.as_p }}
             <button type="submit" value="bid">Bid</button>
         {% endif %}
     </form>
 
     <form action="{% url 'listing' listing.id %}" method="post">
         {% csrf_token %}
-        {{ comment_form }}
+        {{ comment_form.as_p }}
         <input type="submit" value="comment">
     </form>
-
     {% for bid in bids %}
         <p>{{bid}}</p>
     {% endfor %}
