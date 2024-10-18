@@ -1,13 +1,32 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Category Option</h2>
     <h4> {{ option }}</h4>
+    <br>
     {% if selected %}
         {% for option in selected %}
-            <li> <a href="{% url 'listing' option.id %}">{{ option.title }}</a> </li>
+            <ul id="active-listing"> 
+                <div>
+                    <li>{% if option.image %}
+                        <img src="{{ option.image.url }}" alt="photo of item" class="active-image">
+                    {% endif %}</li>
+                </div>
+                <div id="details">
+                    <li> <a href="{% url 'listing' option.id %}">{{ option.title }}</a> </li>
+                    <li>Current Bid: {{ option.starting_bid}}</li>
+                    <li>Category: {{ categories.option.category }} 
+                        {% for category, value in categories.items %}
+                            {% if option.category == category %}
+                                {{ value }}
+                            {% endif %}
+                        {% endfor %}   
+                    
+                    <li>Posting Date: {{ option.posting_date }}</li>
+                </div>
+            </ul>
         {% endfor %}
     {% else %}
         <p> No items in Category</p>
     {% endif %}
+    <hr>
 {% endblock %}

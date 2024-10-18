@@ -6,6 +6,5 @@
         {% for option, count in options.items %}
             <li> <a href="{% url 'option' option %}"> {{ option }} ({{ count }}) </a></li>
         {% endfor %}
-    </ol>
-   
+    </ol>   
 {% endblock %}

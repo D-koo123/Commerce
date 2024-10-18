@@ -50,6 +50,7 @@ class Comments(models.Model):
 class Watchlist(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    user_bid = models.DecimalField()
 
     def __str__(self):
         return f"{self.author}, {self.listing}"

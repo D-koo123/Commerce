@@ -21,7 +21,6 @@
                         <img src="{{ listing.image.url }}" alt="photo of item" id="listing-image">
                     {% endif %}
                 </li>
-                <li> Seller id: {{ listing.user.id }}</li>
             </ul>
         </div>
         <div>
@@ -46,23 +45,23 @@
                 <form action="{% url 'watch' %}" method="post" >
                     {% csrf_token %}
                     {% if available %}
-                        <button type="submit" value="{{listing.id}}" name="bid">Remove from watchlist</button>
+                        <button type="submit" value="{{listing.id}}" class="bid" name="remove">Remove from watchlist</button>
                     {% else %}
-                        <button type="submit" value="{{listing.id}}" class="bid" name="Add">Add to watchlist</button>
+                        <button type="submit" value="{{listing.id}}" class="bid" name="add">Add to watchlist</button>
                     {% endif %}
                 </form><br>
                 <li></li> Item Description <br> </li>
                 <li id="description"><p><i>{{ listing.description }}</i></p></li>
                 <li> Seller: {{ listing.user }}</li>
-                <p>Total bids <strong>({{ total_bids }})</strong></p>
+                <p>Total bids <small><strong>({{ total_bids }})</strong></small></p>
                 <form action="{% url 'listing' listing.id %}" method="post">
                     {% csrf_token %}
                     {% if user.id == listing.user.id %}
-                        <input type="hidden"  name= "close" value="close">
-                        <button type="submit" >Close Bid</button>
+                        <input type="hidden"  name= "close" value="close" >
+                        <button type="submit" class="comment-bid">Close Bid</button>
                     {% else %}
                         {{ bid_form.bid }},<br><br>
-                        <button type="submit" value="bid">Bid</button>
+                        <button type="submit" value="bid" class="comment-bid">Post Bid</button>
                     {% endif %}
                 </form>
             </ul>
@@ -73,10 +72,12 @@
     <h4>Comments</h4>
     <div class="comments">
         <div>
+            <hr>
             {% for comment in comments %}
                 <div>
+                    
                     <ul>
-                        <li class="comment-author">{{ comment.author}}</li>
+                        <li class="comment-author"><b>{{ comment.author}}</b></li>
                         <li class="comment-date">{{ comment.comment_date}}</li>
                     </ul>
                 </div>
@@ -84,18 +85,18 @@
                     <ul>
                         <li class="comment-text">{{ comment.comment}}</li>
                     </ul>
-                    <br><hr>
+                    <hr>
                 </div>
             {% endfor %}
             <form action="{% url 'listing' listing.id %}" method="post">
                 {% csrf_token %}
-                {{ comment_form.comment }}<br><br>
-                <input type="submit" value="comment">
+                {%if listing.closed %}
+                    
+                {% else %}
+                    {{ comment_form.comment }}<br>
+                    <input type="submit" value="Comment" style="margin-left: 25px;" class="comment-bid">
+                {% endif %} 
             </form>
-            {% for bid in bids %}
-                <p>{{bid}}</p>
-            {% endfor %}
         </div>   
     </div>
-    
 {% endblock %}

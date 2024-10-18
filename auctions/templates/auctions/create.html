@@ -2,7 +2,7 @@
 
 {% block body %}
     <h2>Create Listings</h2>
-    <form action="{% url 'create' %}" method="post" enctype="multipart/form-data">
+    <form action="{% url 'create' %}" method="post" enctype="multipart/form-data" style="margin-left: 40px;">
         {% csrf_token %}        
         <label for="{{ form.title.id_for_label }}"><strong>{{ form.title.label }}</strong></label><br>
         {{ form.title }}<br>
@@ -14,6 +14,6 @@
         {{ form.starting_bid }}<br>
         <label for="{{ form.image.id_for_label }}"><strong>{{ form.image.label }}</strong></label><br>
         {{ form.image }}<br><br> 
-        <button type="submit">Post Bid</button>
+        <button type="submit">Post Item</button>
     </form>
 {% endblock %}

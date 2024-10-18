@@ -160,8 +160,8 @@ def listing(request, listing_id):
             if comment_form.is_valid():
                 comment = comment_form.cleaned_data['comment']
             else:
-                # Display the error message and return the use to the listing page
-                messages.error(request, "Bid entered is too low")
+                # Display the error message for invalid form and return the use to the listing page
+                messages.error(request, "Invalid update of comment form")
                 return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
 
             # Update the user comment and return the user to the listing page
@@ -200,20 +200,23 @@ def listing(request, listing_id):
 def watchlist(request):
     user_instance = User.objects.get(id=request.user.id) 
     if request.method == "POST":
-        if 'Add' in request.POST:
-            listing_instance = Listing.objects.get(id=request.POST.get("Add"))
-        else:
-            listing_instance = Listing.objects.get(id=request.POST.get("Remove"))
-        if Watchlist.objects.filter(author = user_instance, listing_id = listing_instance).exists():
-            watch = Watchlist.objects.get(author = user_instance , listing = listing_instance)
-            watch.delete()
-        else:
-            watch = Watchlist(author = user_instance, listing = listing_instance)
-            #return HttpResponse(watch)
+        # Check if an item was being added or removed from the watchlist
+        if 'add' in request.POST:
+            # If adding update the watchlist database
+            listing_instance = Listing.objects.get(id=request.POST.get("add"))
+            user_bid = Bids_table.objects.filter(author = user_instance, listing = listing_instance).last()
+            watch = Watchlist(author = user_instance, listing = listing_instance, user_bid = user_bid)
             watch.save()
+        else:
+            # If removing delete the item from the watchlist database
+            listing_instance = Listing.objects.get(id=request.POST.get("remove"))
+            if Watchlist.objects.filter(author = user_instance, listing_id = listing_instance).exists():
+                watch = Watchlist.objects.get(author = user_instance , listing = listing_instance)
+                watch.delete()
         return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_instance.id}))
     else:
         watch_items = Watchlist.objects.filter(author= user_instance)
+        
         #return HttpResponse("Still checking")
         #list_items = Listings.objects.filter(id__in = watch_itemsids)
         return render(request, "auctions/watch.html", {
@@ -243,8 +246,18 @@ def option(request, option):
             return render(request, "auctions/option.html", {
                 "selected":selected,
                 "option": option,
-                "total": total_items(request.user.id)
+                "total": total_items(request.user.id),
+                "categories": categories 
         })
+
+
+
+
+
+
+
+
+
 
 
 def total_items(user_id):

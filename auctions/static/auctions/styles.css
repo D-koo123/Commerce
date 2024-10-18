@@ -17,14 +17,14 @@ h2 {
 }
 
 #listing-image {
-    width: 600px;
-    height: 400px;
+    width: 350px;
+    height: 350px;
     margin: 50px;
 }
 
 .active-image {
-    width: 300px;
-    height: 300px;
+    width: 150px;
+    height: 150px;
 }
 
 ul {
@@ -33,7 +33,6 @@ ul {
 
 
 /* Listing page */
-
 .listing {
     display: grid;
     grid-template-columns: 1fr 1fr; 
@@ -60,9 +59,7 @@ ul {
     border-radius: 10px;
 }
 
-.comments {
-    width: 50vw;
-}
+
 .comment-author {
     font-size: 0.5em;
 }
@@ -71,8 +68,10 @@ ul {
     font-size: 0.5em;
 }
 
-.comment {
+.comments {
     font-size: 0.85em;
+    width: 60vw;
+
 }
 
 h4 {
@@ -81,8 +80,15 @@ h4 {
 
 .custom-textarea {
     margin: 20px;              /* Set margins around the textarea */
-    border: 2px solid #ccc;    /* Border style */
+    border: 1px solid #ccc;    /* Border style */
     border-radius: 8px;        /* Rounded borders */
     padding: 10px;
     resize: none;
 }
+
+
+.comment-bid {
+    width: 6vw;
+    border-radius: 8px;
+}
+
