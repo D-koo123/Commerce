@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from .models import User, Listing, Bids_table, Comments, Watchlist
 from auctions.forms import ListingForm, BidForm, CommentsForm
 
+# A global to for all functions acces all category options
+categories = dict(Listing.CATEGORY_CHOICES)
 
 def index(request):
     '''
@@ -18,7 +20,8 @@ def index(request):
     listing = Listing.objects.exclude(closed=True)
     return render(request, "auctions/index.html", {
         "listings":listing,
-        "total": total_items(request.user.id)
+        "total": total_items(request.user.id),
+        "categories": categories 
     })
 
 
@@ -80,32 +83,29 @@ def create_listing(request):
     It updates the listings if the method is submitted via post
     '''
     if request.method == "POST":
-        user_instance = User.objects.get(id=request.user.id)
+        
         # Obtain the form data
         list_form = ListingForm(request.POST, request.FILES)
         if list_form.is_valid():
-            form.save()
+            user_instance = User.objects.get(id=request.user.id)
+            listing_instance = Listing()
+            listing_instance = list_form.save(commit=False)
+            listing_instance.user = user_instance
+            listing_instance.save()
         else:
-            HttpResponse("Your index submission has errors")
-
-        
-        return HttpResponseRedirect(reverse("index"))
+            messages.error(request, "invalid user input")
+            HttpResponseRedirect(reverse("create"))
+        return HttpResponseRedirect(reverse("create"))
     else:
-        # If the user is logged in when visiting the create listing page
-        if request.user.is_authenticated:
-
-            # create an instance of the form to bused in Listings table
-            form = ListingForm()
-            return render(request, "auctions/create.html", {
-                "form": form,
-                "total": total_items(request.user.id)
-            })
-        else:
-            # Remind the user to login
-            messages.error(request, "Kindly login")
-            return HttpResponseRedirect(reverse("login_vies"))
+        # create an instance of the form to bused in Listings table
+        form = ListingForm()
+        return render(request, "auctions/create.html", {
+            "form": form,
+            "total": total_items(request.user.id)
+        })
 
 
+@login_required()
 def listing(request, listing_id):
     '''
     Returns the lisitng page for individual item when GET request is made
@@ -117,13 +117,12 @@ def listing(request, listing_id):
         # Obtain the listing from the Listings table where it is the primary key
         listing_instance = Listing.objects.get(id=listing_id)
         if "bid" in request.POST:
-            #return HttpResponse(request.POST.get("bid"))
             bid_form = BidForm(request.POST)
             if bid_form.is_valid():
                 bid = bid_form.cleaned_data['bid']
             else:
-                # Recheck how to handle errors
-                return HttpResponse("Your form submission bid has errors")
+                messages.error(request, "Enter correct input!")
+                return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
                 #return render(request, "auctions/bid.html")
 
             # Check if the new bid is higher
@@ -131,13 +130,16 @@ def listing(request, listing_id):
                 # Get and save the bid from the user only to be updated if its higher than current bid
                 bids = Bids_table(author = user_instance, listing = listing_instance, bid = bid)    
                 bids.save()
+                # Display to the user their bid was succesful
+                messages.success(request, "Your bids was succesful!")
 
                 # Update the listings table with the new bid amount also
                 listing_instance.starting_bid = request.POST.get("starting_bid", bid)
                 listing_instance.save()
                 return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
             else:
-                return HttpResponse("Bid entered is too low")
+                messages.error(request, "Bid entered is too low")
+                return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
 
         elif "close" in request.POST:
             # Change the status of the closed field to true if the bid is closed
@@ -148,7 +150,9 @@ def listing(request, listing_id):
             if not available:
                 # Add the item to the watchlist if not so the user can access when its not active
                 watch = Watchlist(author = user_instance, listing = listing_instance)
-                watch.save()
+                watch.save()    
+            # Alert the seller the bid has succesfully closed and return to the listing page?
+            messages.success(request, "Bid closed!!!")
             return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
 
         else:
@@ -156,9 +160,11 @@ def listing(request, listing_id):
             if comment_form.is_valid():
                 comment = comment_form.cleaned_data['comment']
             else:
-                return HttpResponse("Your form submission has comment errors")
+                # Display the error message and return the use to the listing page
+                messages.error(request, "Bid entered is too low")
+                return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
 
-            # Update the user comment
+            # Update the user comment and return the user to the listing page
             update_comment = Comments(author = user_instance, listing = listing_instance, comment = comment)
             update_comment.save()
             return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
@@ -186,10 +192,11 @@ def listing(request, listing_id):
             "comments":comments,
             "available":available,
             "total": total_items(request.user.id),
-            "total_bids" : total_bids(listing_id)
+            "total_bids" : total_bids(listing_id),
+            "categories": categories 
         })
     
-
+@login_required()
 def watchlist(request):
     user_instance = User.objects.get(id=request.user.id) 
     if request.method == "POST":
@@ -204,7 +211,7 @@ def watchlist(request):
             watch = Watchlist(author = user_instance, listing = listing_instance)
             #return HttpResponse(watch)
             watch.save()
-        return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
+        return HttpResponseRedirect(reverse("listing", kwargs={"listing_id": listing_instance.id}))
     else:
         watch_items = Watchlist.objects.filter(author= user_instance)
         #return HttpResponse("Still checking")
@@ -215,14 +222,14 @@ def watchlist(request):
         })
     
 
-
 def category(request):
     if request.method == 'POST':
         ...
     else:
-        options = []
+        options = {}
         for option in Listing.CATEGORY_CHOICES:
-            options.append(option[1])
+            options[(option[1])] = Listing.objects.filter(category=option[0]).count()
+            
         return render(request, "auctions/category.html", {
             "options":options,
             "total": total_items(request.user.id)
@@ -235,13 +242,20 @@ def option(request, option):
             selected = Listing.objects.filter(category=possibility[0])
             return render(request, "auctions/option.html", {
                 "selected":selected,
-                "option": option
+                "option": option,
+                "total": total_items(request.user.id)
         })
 
 
 def total_items(user_id):
+     '''
+     This function returns the total items added to the watchlist by the user
+     '''
      return Watchlist.objects.filter(author = user_id).count()
 
 
 def total_bids(listing_id):
+     '''
+     This function returns the total bids on the item
+     '''
      return Bids_table.objects.filter(listing= listing_id).count()

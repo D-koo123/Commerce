@@ -2,10 +2,10 @@
 
 {% block body %}
     <h2>Categories</h2>
-    <ul>
-        {% for option in options %}
-            <li> <a href="{% url 'option' option %}"> {{ option }}</a></li>
+    <ol>
+        {% for option, count in options.items %}
+            <li> <a href="{% url 'option' option %}"> {{ option }} ({{ count }}) </a></li>
         {% endfor %}
-    </ul>
+    </ol>
    
 {% endblock %}

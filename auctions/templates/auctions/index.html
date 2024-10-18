@@ -13,7 +13,13 @@
             <div id="details">
                 <li><a href="{% url 'listing' listing.id %}">Item: {{ listing.title }} </a></li>
                 <li>Current Bid: {{ listing.starting_bid}}</li>
-                <li>Category: {{ listing.category}}</li>     
+                <li>Category: {{ categories.listing.category }} 
+                    {% for category, value in categories.items %}
+                        {% if listing.category == category %}
+                            {{ value }}
+                        {% endif %}
+                    {% endfor %}   
+                </li>
                 <li>Seller: {{ listing.user.username }}</li> 
                 <li>Posting Date: {{ listing.posting_date }}</li>
             </div>
