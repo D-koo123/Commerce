@@ -32,7 +32,7 @@
                     {% endif %}
                 {% endfor %} </h6></li>
                 <hr>
-                <li><h5>Kshs. {{ listing.starting_bid }}</h5></li>
+                <li><h5>Price: {{ listing.starting_bid }}</h5></li>
                 <li>
                     <strong> Status:
                         {%if listing.closed %}
@@ -54,16 +54,18 @@
                 <li id="description"><p><i>{{ listing.description }}</i></p></li>
                 <li> Seller: {{ listing.user }}</li>
                 <p>Total bids <small><strong>({{ total_bids }})</strong></small></p>
-                <form action="{% url 'listing' listing.id %}" method="post">
-                    {% csrf_token %}
-                    {% if user.id == listing.user.id %}
-                        <input type="hidden"  name= "close" value="close" >
-                        <button type="submit" class="comment-bid">Close Bid</button>
-                    {% else %}
-                        {{ bid_form.bid }},<br><br>
-                        <button type="submit" value="bid" class="comment-bid">Post Bid</button>
-                    {% endif %}
-                </form>
+                {% if listing.closed == False %}
+                    <form action="{% url 'listing' listing.id %}" method="post">
+                        {% csrf_token %}
+                        {% if user.id == listing.user.id %}
+                            <input type="hidden"  name= "close" value="close" >
+                            <button type="submit" class="comment-bid">Close Bid</button>
+                        {% else %}
+                            {{ bid_form.bid }},<br><br>
+                            <button type="submit" value="bid" class="comment-bid">Post Bid</button>
+                        {% endif %}
+                    </form>
+                {% endif %}
             </ul>
         </div>
     </div>

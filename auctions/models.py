@@ -27,7 +27,7 @@ class Listing(models.Model):
     
 
     def __str__(self):
-        return f"{self.id} {self.title} : {self.category}"
+        return f"Item {self.id}: {self.title}"
 
 
 class Bids_table(models.Model):
@@ -37,14 +37,17 @@ class Bids_table(models.Model):
     
 
     def __str__(self):
-        return f"{self.author}, {self.listing}, {self.bid}"
+        return f"{self.listing} @ {self.bid}"
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     comment = models.TextField()
     comment_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.author} commented {self.comment} on the {self.listing.title}'
 
 
 class Watchlist(models.Model):
@@ -53,4 +56,4 @@ class Watchlist(models.Model):
     user_bid = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
 
     def __str__(self):
-        return f"{self.author}, {self.listing}"
+        return f"{self.listing.title}"

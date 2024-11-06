@@ -1,5 +1,5 @@
 from django import forms
-from auctions.models import Listing, Bids_table, Comments
+from auctions.models import Listing, Bids_table, Comment
 
 
 class ListingForm(forms.ModelForm):
@@ -17,7 +17,7 @@ class BidForm(forms.ModelForm):
 
 class CommentsForm(forms.ModelForm):
     class Meta:
-        model = Comments
+        model = Comment
         fields = ["comment"]
         widgets = {
             'comment': forms.Textarea(attrs={'rows': 5, 'cols': 100, 'placeholder': "Enter comment......", 'class': 'custom-textarea'})

@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from .models import User, Listing, Bids_table, Comments, Watchlist
+from .models import User, Listing, Bids_table, Comment, Watchlist
 from auctions.forms import ListingForm, BidForm, CommentsForm
 
 # A global to for all functions acces all category options
@@ -17,7 +17,7 @@ def index(request):
     Renders all the active bids in the online auction
     '''
     #Pick only bids that are still active
-    listing = Listing.objects.exclude(closed=True)
+    listing = Listing.objects.exclude(closed=True).order_by('-posting_date')
     return render(request, "auctions/index.html", {
         "listings":listing,
         "total": total_items(request.user.id),
@@ -95,7 +95,7 @@ def create_listing(request):
         else:
             messages.error(request, "invalid user input")
             HttpResponseRedirect(reverse("create"))
-        return HttpResponseRedirect(reverse("create"))
+        return HttpResponseRedirect(reverse("index"))
     else:
         # create an instance of the form to bused in Listings table
         form = ListingForm()
@@ -145,12 +145,19 @@ def listing(request, listing_id):
             # Change the status of the closed field to true if the bid is closed
             listing_instance.closed = True
             listing_instance.save()
-            # Check if the winner of the bid already has the item in their watchlist
-            available = Watchlist.objects.filter(author = user_instance, listing_id = listing_instance).exists()
+            # Check if the issuer of the bid already has the item in their watchlist
+            available = Watchlist.objects.filter(author = user_instance, listing = listing_instance).exists()
             if not available:
                 # Add the item to the watchlist if not so the user can access when its not active
                 watch = Watchlist(author = user_instance, listing = listing_instance)
-                watch.save()    
+                watch.save() 
+            # Check if the winner of the bid already has the item in the watchlist
+            winning_bid = Bids_table.objects.filter(listing = listing_instance).last()
+            winner = winning_bid.author
+            winner_watchlist_available = Watchlist.objects.filter(author = winner, listing=listing_instance).exists()
+            if not winner_watchlist_available:
+                winner_watch = Watchlist(author = winner, listing=listing_instance) 
+                winner_watch.save()
             # Alert the seller the bid has succesfully closed and return to the listing page?
             messages.success(request, "Bid closed!!!")
             return HttpResponseRedirect(reverse("listing",kwargs={"listing_id": listing_instance.id}))
