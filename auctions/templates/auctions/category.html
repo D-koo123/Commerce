@@ -2,9 +2,9 @@
 
 {% block body %}
     <h2>Categories</h2>
-    <ol>
+    <ol class="list-group">
         {% for option, count in options.items %}
-            <li> <a href="{% url 'option' option %}"> {{ option }} ({{ count }}) </a></li>
+            <li class="list-group-item"> <a href="{% url 'option' option %}"> {{ option }} ({{ count }}) </a></li>
         {% endfor %}
     </ol>   
 {% endblock %}

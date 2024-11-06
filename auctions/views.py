@@ -179,8 +179,12 @@ def listing(request, listing_id):
                 author=winner, listing=listing_instance
             ).exists()
             if not winner_watchlist_available:
-                winner_watch = Watchlist(author=winner, listing=listing_instance)
+                winner_watch = Watchlist(author=winner, listing=listing_instance, user_bid = winning_bid.bid)
                 winner_watch.save()
+
+            else:
+                winner_watchlist_available.user_bid = winning_bid.user_bid
+                winner_watchlist_available.save()
             # Alert the seller the bid has succesfully closed and return to the listing page?
             messages.success(request, "Bid closed!!!")
             return HttpResponseRedirect(
@@ -245,6 +249,7 @@ def listing(request, listing_id):
 def watchlist(request):
     user_instance = User.objects.get(id=request.user.id)
     if request.method == "POST":
+
         # Check if an item was being added or removed from the watchlist
         if "add" in request.POST:
             # If adding update the watchlist database
@@ -252,17 +257,20 @@ def watchlist(request):
             user_bid = Bids_table.objects.filter(
                 author=user_instance, listing=listing_instance
             ).last()
+            # If the user had made a bid on the item add to the watchlist with his highest bid
             if user_bid:
                 watch = Watchlist(
                     author=user_instance,
                     listing=listing_instance,
                     user_bid=user_bid.bid,
                 )
+            # If the user had not made a bid add it with default value of kshs. 0
             else:
                 watch = Watchlist(author=user_instance, listing=listing_instance)
+            # In either case after updating the instance save it to the table
             watch.save()
+        # If the request is to remove the item from the watchlist then...
         else:
-            # If removing delete the item from the watchlist database
             listing_instance = Listing.objects.get(id=request.POST.get("remove"))
             if Watchlist.objects.filter(
                 author=user_instance, listing_id=listing_instance
@@ -274,11 +282,9 @@ def watchlist(request):
         return HttpResponseRedirect(
             reverse("listing", kwargs={"listing_id": listing_instance.id})
         )
+    # if the method is GET
     else:
         watch_items = Watchlist.objects.filter(author=user_instance)
-
-        # return HttpResponse("Still checking")
-        # list_items = Listings.objects.filter(id__in = watch_itemsids)
         return render(
             request,
             "auctions/watch.html",
